@@ -1,0 +1,59 @@
+# Analysis of Uber Pickup - NYC
+import numpy as np;
+import pandas as pd;
+import matplotlib.pyplot as plt;
+import seaborn as sns;
+# %matplotlib inline sets the backend of matplotlib to the 'inline' backend: 
+#  With this backend, the output of plotting commands is displayed inline within frontends like the Jupyter notebook, directly below the code cell that produced it. 
+
+%matplotlib inline
+
+# Loading the dataset
+
+uber=pd.read_csv('uber_pickup_data.csv');
+
+# Display the head of headset
+
+print (uber.head()); # Top 5 rows
+print (uber.info()); # Returns no of rows and columns
+
+# Check for any missing values in the dataset
+def num_missing(x):
+    return sum(x.isnull());
+print (uber.apply(num_missing, axis=0));
+
+# Extract additional information
+
+uber['Date/Time'] = pd.to_datetime(uber['Date/Time'], format="%m/%d/%Y %H:%M:%S");
+uber['DayofWeekNum'] = uber['Date/Time'].dt.dayofweek;
+uber['DayofWeek'] = uber['Date/Time'].dt.day_name();
+uber['DayNum'] = uber['Date/Time'].dt.day;
+uber['HourofDay'] = uber['Date/Time'].dt.hour;
+print (uber.head(10));
+
+# Total rides based on the base code
+
+sns.catplot(x='Base',data=uber, kind='count');
+
+# Visualize which day of week had more trips
+
+uber_week_data = uber.pivot_table(index=['DayofWeekNum','DayofWeek'],aggfunc='count');
+print (uber_week_data);
+uber_week_data = uber.pivot_table(index=['DayofWeekNum','DayofWeek'],values='Base',aggfunc='count');
+print (uber_week_data);
+
+# Hourly data
+uber_hourly_data=uber.pivot_table(index=['HourofDay'], values='Base', aggfunc='count');
+print (uber_hourly_data);
+uber_hourly_data.plot(kind='line', figsize=(10,6), title="Hourly Journey");
+
+# Day Num data
+uber_hourly_data=uber.pivot_table(index=['DayNum'], values='Base', aggfunc='count');
+print (uber_hourly_data);
+uber_hourly_data.plot(kind='bar', figsize=(10,6), title="Day Num Journey");
+
+# Sort by date of the month
+
+by_date = uber_hourly_data.sort_values('Base');
+print (by_date);
+by_date.plot(kind='bar', figsize=(10,6), title="Day Num Journey");
